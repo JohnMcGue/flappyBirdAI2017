@@ -132,14 +132,23 @@ class GameState:
 
         SCREEN.blit(IMAGES['base'], (self.basex, BASEY))
         # print score so player overlaps the score
-        # showScore(self.score)
+        showScore(self.score)
         SCREEN.blit(IMAGES['player'][self.playerIndex],
                     (self.playerx, self.playery))
-
+        
+        playerRect = pygame.Rect(self.playerx, self.playery, IMAGES['player'][0].get_width(), IMAGES['player'][0].get_height())
+        uPipeRect = pygame.Rect(self.upperPipes[0]['x'], self.upperPipes[0]['y'], PIPE_WIDTH, PIPE_HEIGHT)
+        lPipeRect = pygame.Rect(self.lowerPipes[0]['x'], self.lowerPipes[0]['y'], PIPE_WIDTH, PIPE_HEIGHT)
+        uPipeRect2 = pygame.Rect(self.upperPipes[1]['x'], self.upperPipes[1]['y'], PIPE_WIDTH, PIPE_HEIGHT)
+        lPipeRect2 = pygame.Rect(self.lowerPipes[1]['x'], self.lowerPipes[1]['y'], PIPE_WIDTH, PIPE_HEIGHT)
+        uPipeRectList = [uPipeRect,uPipeRect2]
+        lPipeRectList = [lPipeRect,lPipeRect2]
+        state = {'playerRect':playerRect, 'uPipeRects':uPipeRectList, 'lPipeRects':lPipeRectList,
+                  'playerVelY':self.playerVelY, 'pipeVelX':self.pipeVelX}
         pygame.display.update()
         FPSCLOCK.tick(FPS)
-        #print self.upperPipes[0]['y'] + PIPE_HEIGHT - int(BASEY * 0.2)
-        return reward, terminal
+        
+        return state, reward, terminal
 
 def getRandomPipe():
     """returns a randomly generated pipe"""
