@@ -5,7 +5,7 @@ import game.flappy_bird_utils as flappy_bird_utils
 from pygame.locals import *
 from itertools import cycle
 
-FPS = 30
+FPS = 240
 SCREENWIDTH  = 288
 SCREENHEIGHT = 512
 
@@ -50,7 +50,6 @@ class GameState:
         self.pipeVelX = -4
         self.playerVelY    =  0    # player's velocity along Y, default same as playerFlapped
         self.playerMaxVelY =  10   # max vel along Y, max descend speed
-        self.playerMinVelY =  -8   # min vel along Y, max ascend speed
         self.playerAccY    =   1   # players downward accleration
         self.playerFlapAcc =  -9   # players speed on flapping
         self.playerFlapped = False # True when player flaps
@@ -137,12 +136,13 @@ class GameState:
                     (self.playerx, self.playery))
         
         playerRect = pygame.Rect(self.playerx, self.playery, IMAGES['player'][0].get_width(), IMAGES['player'][0].get_height())
-        uPipeRect = pygame.Rect(self.upperPipes[0]['x'], self.upperPipes[0]['y'], PIPE_WIDTH, PIPE_HEIGHT)
-        lPipeRect = pygame.Rect(self.lowerPipes[0]['x'], self.lowerPipes[0]['y'], PIPE_WIDTH, PIPE_HEIGHT)
-        uPipeRect2 = pygame.Rect(self.upperPipes[1]['x'], self.upperPipes[1]['y'], PIPE_WIDTH, PIPE_HEIGHT)
-        lPipeRect2 = pygame.Rect(self.lowerPipes[1]['x'], self.lowerPipes[1]['y'], PIPE_WIDTH, PIPE_HEIGHT)
-        uPipeRectList = [uPipeRect,uPipeRect2]
-        lPipeRectList = [lPipeRect,lPipeRect2]
+        uPipeRectList = []
+        lPipeRectList = []
+        for uPipe, lPipe in zip(self.upperPipes, self.lowerPipes):
+            uPipeRect = pygame.Rect(uPipe['x'], uPipe['y'], PIPE_WIDTH, PIPE_HEIGHT)
+            uPipeRectList.append(uPipeRect)
+            lPipeRect = pygame.Rect(lPipe['x'], lPipe['y'], PIPE_WIDTH, PIPE_HEIGHT)
+            lPipeRectList.append(lPipeRect)
         state = {'playerRect':playerRect, 'uPipeRects':uPipeRectList, 'lPipeRects':lPipeRectList,
                   'playerVelY':self.playerVelY, 'pipeVelX':self.pipeVelX}
         pygame.display.update()
