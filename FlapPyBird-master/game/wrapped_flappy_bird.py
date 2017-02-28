@@ -5,7 +5,7 @@ import game.flappy_bird_utils as flappy_bird_utils
 from pygame.locals import *
 from itertools import cycle
 
-FPS = 240
+FPS = 1
 SCREENWIDTH  = 288
 SCREENHEIGHT = 512
 
@@ -54,18 +54,13 @@ class GameState:
         self.playerFlapAcc =  -9   # players speed on flapping
         self.playerFlapped = False # True when player flaps
 
-    def frame_step(self, input_actions):
+    def frame_step(self, flap):
         pygame.event.pump()
 
         reward = 0.1
         terminal = False
 
-        if sum(input_actions) != 1:
-            raise ValueError('Multiple input actions!')
-
-        # input_actions[0] == 1: do nothing
-        # input_actions[1] == 1: flap the bird
-        if input_actions[1] == 1:
+        if flap:
             if self.playery > -2 * PLAYER_HEIGHT:
                 self.playerVelY = self.playerFlapAcc
                 self.playerFlapped = True
