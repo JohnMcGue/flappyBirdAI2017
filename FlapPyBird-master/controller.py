@@ -3,7 +3,7 @@ from __future__ import print_function
 import sys
 import game.wrapped_flappy_bird as game
 import random
-from math import sqrt
+from math import sqrt, atan2
 
 ACTIONS = 2
 FIRST_JUMP = True
@@ -21,22 +21,26 @@ def run():
 def discretizeState(state):
     player = state['playerRect']
     playerVelY = state['playerVelY']
-    birdMid = (player.x+player.width/2,player.y+player.height/2)
+    birdMid = (player.x+(player.width/2),player.y+(player.height/2))
     upperPipeList = state['uPipeRects']
     lowerPipeList = state['lPipeRects']
     discState = [playerVelY]
-    for x in range(0,upperPipeList.size):
-        discState.append(distanceBirdToPipeMiddle(birdMid,upperPipeList[x],lowerPipeList[x]))
-        
-def distanceBirdToPipeMiddle(birdMid,upperPipe,lowerPipe):
-    pipeMid = (upperPipe.x,(upperPipe.bottom+lowerPipe.top)/2)
-    distanceToPipeMiddle = eucDistance(birdMid, pipeMid)
-    angleToPipe = 
- 
-def eucDistance(birdMid, pipeMid):
+    for x in range(0,len(upperPipeList)):
+        if(player.left<upperPipeList[x].right):
+            pipeMid = (upperPipeList[x].x+(upperPipeList[x].width/2),(upperPipeList[x].bottom+lowerPipeList[x].top)/2)
+            if(x!=len(upperPipeList)-1):
+                discState.append(distanceBirdToPipeMiddle(birdMid,pipeMid))
+            discState.append(angleBirdToPipeMiddle(birdMid,pipeMid))
+    print(discState)
+    
+def distanceBirdToPipeMiddle(birdMid,pipeMid):
     xDistance = pipeMid[0]-birdMid[0]
     yDistance = pipeMid[1]-birdMid[1]
-    return sqrt((xDistance)^2+(yDistance)^2) 
+    return int(sqrt((xDistance)**2+(yDistance)**2))
+
+def angleBirdToPipeMiddle(birdMid,pipeMid):
+    diffPoint = (pipeMid[0]-birdMid[0],pipeMid[1]-birdMid[1])
+    return int(atan2(diffPoint[1],diffPoint[0])*100)   
  
 def randomStrategy():
     if(random.randrange(ACTIONS)==0):
