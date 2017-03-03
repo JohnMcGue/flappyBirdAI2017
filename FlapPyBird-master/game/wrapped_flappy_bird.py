@@ -5,7 +5,7 @@ import game.flappy_bird_utils as flappy_bird_utils
 from pygame.locals import *
 from itertools import cycle
 
-FPS = 1
+FPS = 1000
 SCREENWIDTH  = 288
 SCREENHEIGHT = 512
 
@@ -57,10 +57,10 @@ class GameState:
     def frame_step(self, flap):
         pygame.event.pump()
 
-        reward = 0.1
+        reward = .1
         terminal = False
 
-        if flap:
+        if flap == 1:
             if self.playery > -2 * PLAYER_HEIGHT:
                 self.playerVelY = self.playerFlapAcc
                 self.playerFlapped = True
@@ -73,7 +73,6 @@ class GameState:
             if pipeMidPos <= playerMidPos < pipeMidPos + 4:
                 self.score += 1
                 #SOUNDS['point'].play()
-                reward = 1
 
         # playerIndex basex change
         if (self.loopIter + 1) % 3 == 0:
