@@ -3,16 +3,21 @@ from __future__ import print_function
 import sys
 import game.wrapped_flappy_bird as game
 import random
+import pickle
+import os
+import math
+
 from math import sqrt, atan2
 from argparse import Action
 from tkinter.constants import CURRENT
-
-ACTIONS = 2
-FIRST_JUMP = True
-LEARNING_RATE = 1
-DISCOUNT_FACTOR = 1
+from errno import EPERM
+ 
+LEARNING_RATE = .1
+DISCOUNT_FACTOR = .9
 DEFAULT_REWARD = 0
 QMATRIX = {}
+EP = .999
+
 
 def run():
     game_state = game.GameState()
@@ -32,10 +37,16 @@ def run():
 #     qMatrix[state] = actionReward
 #     print(qMatrix[state])
 #     print(qMatrix.get(qMatrix.get(state)[0][0]))
+    global QMATRIX
+#     try:
+#         QMATRIX = pickle.load(open("save.p", "rb"))
+#     except (OSError, IOError, EOFError) as e:
+#         print("No saved matrix: ",e)
     state, reward, terminal = game_state.frame_step(flap)
     currentState = discretizeState(state)
-    actionReward = [int(DEFAULT_REWARD),int(DEFAULT_REWARD)]
-    QMATRIX[currentState] = actionReward
+    if(QMATRIX.get(currentState) is None):
+            actionReward = [int(DEFAULT_REWARD),int(DEFAULT_REWARD)]
+            QMATRIX[currentState] = actionReward
     currentActionReward = QMATRIX[currentState]
     print(QMATRIX)
     deathCount = 0
@@ -56,6 +67,9 @@ def run():
         currentActionReward = QMATRIX[currentState]
         score+=1
         if(terminal):
+            global EP
+            if deathCount % 3 == 0:
+                EP = EP*.999
             if(len(scoreList)<100):
                 scoreList.append(score)
             else:
@@ -63,8 +77,9 @@ def run():
                 scoreList.append(score)
             deathCount+=1
             score = 0
-            print("DEATH: ",deathCount," SPD100: ",sum(scoreList)/len(scoreList))
+            #print("DEATH: ",deathCount," SPD100: ",sum(scoreList)/len(scoreList), "EP: ",EP)
             #print("QMATRIX: ",QMATRIX)
+            #pickle.dump(QMATRIX, open("save.p", "wb" ) )
     
 def calcReward(currentReward,newReward,newState):
     newActionReward = QMATRIX.get(newState)
@@ -76,6 +91,10 @@ def getMax(newActionReward):
     return newActionReward[0]
 
 def qStrategy(actionReward):
+    global EP
+    randomNumber = random.randrange(0,100)/100
+    if( EP > randomNumber):
+        return randomStrategy()
     notFlap = actionReward[0]
     flap = actionReward[1]
     if(flap>notFlap):
@@ -114,7 +133,7 @@ def angleBirdToPipeMiddle(birdMid,pipeMid):
  
 def randomStrategy():
     actionRange = ACTIONS*100
-    if(random.randrange(actionRange)>175):
+    if(random.randrange(actionRange)>100):
         return 1
     return 0
 
