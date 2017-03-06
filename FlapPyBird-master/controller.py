@@ -16,7 +16,8 @@ LEARNING_RATE = .1
 DISCOUNT_FACTOR = .9
 DEFAULT_REWARD = 0
 QMATRIX = {}
-EP = .999
+EP = .1
+ACTIONS = 2
 
 
 def run():
@@ -48,7 +49,6 @@ def run():
             actionReward = [int(DEFAULT_REWARD),int(DEFAULT_REWARD)]
             QMATRIX[currentState] = actionReward
     currentActionReward = QMATRIX[currentState]
-    print(QMATRIX)
     deathCount = 0
     score = 0
     scoreList = []
@@ -57,19 +57,18 @@ def run():
         #flap = randomStrategy()
         #flap = heuristicStrategy(state)
         newState, newReward, terminal = game_state.frame_step(flap)
-        newState = discretizeState(newState)
-        if(QMATRIX.get(newState) is None):
-            actionReward = [int(DEFAULT_REWARD),int(DEFAULT_REWARD)]
-            QMATRIX[newState] = actionReward
-        currentActionReward[flap] = calcReward(currentActionReward[flap],newReward,newState)
-        QMATRIX[currentState] = currentActionReward
-        currentState = newState
-        currentActionReward = QMATRIX[currentState]
-        score+=1
         if(terminal):
+            currentActionReward[flap] = newReward
+            QMATRIX[currentState] = currentActionReward
+            state, reward, terminal = game_state.frame_step(flap)
+            currentState = discretizeState(state)
+            if(QMATRIX.get(currentState) is None):
+                    actionReward = [int(DEFAULT_REWARD),int(DEFAULT_REWARD)]
+                    QMATRIX[currentState] = actionReward
+            currentActionReward = QMATRIX[currentState]
             global EP
-            if deathCount % 3 == 0:
-                EP = EP*.999
+            #if deathCount % 3 == 0:
+             #   EP = EP*.999
             if(len(scoreList)<100):
                 scoreList.append(score)
             else:
@@ -78,12 +77,22 @@ def run():
             deathCount+=1
             score = 0
             #print("DEATH: ",deathCount," SPD100: ",sum(scoreList)/len(scoreList), "EP: ",EP)
-            #print("QMATRIX: ",QMATRIX)
             #pickle.dump(QMATRIX, open("save.p", "wb" ) )
+        else:
+            newState = discretizeState(newState)
+            if(QMATRIX.get(newState) is None):
+                actionReward = [int(DEFAULT_REWARD),int(DEFAULT_REWARD)]
+                QMATRIX[newState] = actionReward
+            newActionReward = QMATRIX.get(newState)
+            currentActionReward[flap] = calcReward(currentActionReward[flap],newReward,newActionReward)
+            QMATRIX[currentState] = currentActionReward
+            currentState = newState
+            currentActionReward = QMATRIX[currentState]
+            score+=1
+            #print("QMATRIX: ",QMATRIX)
     
-def calcReward(currentReward,newReward,newState):
-    newActionReward = QMATRIX.get(newState)
-    return currentReward + LEARNING_RATE*(newReward+DISCOUNT_FACTOR*getMax(newActionReward)-currentReward)
+def calcReward(currentReward,newReward,newActionReward):
+    return currentReward + LEARNING_RATE*(newReward+(DISCOUNT_FACTOR*getMax(newActionReward))-currentReward)
 
 def getMax(newActionReward):
     if(newActionReward[1]>newActionReward[0]):

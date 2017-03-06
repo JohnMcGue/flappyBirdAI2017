@@ -5,7 +5,7 @@ import game.flappy_bird_utils as flappy_bird_utils
 from pygame.locals import *
 from itertools import cycle
 
-FPS = 100000
+FPS = 10000000
 SCREENWIDTH  = 288
 SCREENHEIGHT = 512
 
