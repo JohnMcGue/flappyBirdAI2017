@@ -3,9 +3,12 @@ from __future__ import print_function
 import game.wrapped_flappy_bird as game
 import random
 import pickle
-from decimal import *
+from heuristicStrategy import heuristicStrategy
+from QLearning import QLearning
+import datetime
 
 from math import sqrt, atan2
+from time import clock
  
 LEARNING_RATE = .8
 DISCOUNT_FACTOR = .9
@@ -13,6 +16,7 @@ DEFAULT_REWARD = 0
 QMATRIX = {}
 EP = 0.1
 ACTIONS = 2
+STRATEGY = QLearning()
 
 
 def run():
@@ -31,7 +35,7 @@ def run():
     deathCount = 0
     score = 0
     scoreList = []
-    while (deathCount < 100000):
+    while (deathCount < 50000):
         #flap= heuristicStrategy(state)
         flap = qStrategy(currentState)
         state, newReward, terminal = game_state.frame_step(flap)
@@ -42,7 +46,7 @@ def run():
             currentState = discretizeState(state)
             initQMATRIX(currentState)
             if deathCount % 3 == 0 and EP>.1:
-               EP = Decimal(EP*Decimal(.999))
+               EP = EP*.999
             if(len(scoreList)<100):
                 scoreList.append(score)
             else:
@@ -160,68 +164,63 @@ def randomStrategy():
         return 1
     return 0
 
-def heuristicStrategy(state):
-    nextPipeIndex = 0
-    firstLowerPipe = state['lPipeRects'][0]
-    player = state['playerRect']
-    playerVelY = state['playerVelY']
-    pipeVelX = state['pipeVelX']
-    distFromPipeEdge = firstLowerPipe.right-player.left
+def test(timer):
+    game_state = game.GameState()
+    game_state.setFPS(30)
+    flap = 0
+    state, reward, terminal = game_state.frame_step(flap)
+    deathCount = 0
+    score = 0
+    scoreList = []
+    endTime = datetime.datetime.now().time() + datetime.timedelta(minutes=timer)
+    while (datetime.datetime.now().time() < endTime):
+        flap = STRATEGY.getAction(state)
+        state, newReward, terminal = game_state.frame_step(flap)
+        if(terminal):
+            if(len(scoreList)<100):
+                scoreList.append(score)
+            else:
+                scoreList.pop(0)
+                scoreList.append(score)
+            deathCount+=1
+            score = 0
+            print("DEATH: ",deathCount," SPD100: ",sum(scoreList)/len(scoreList))
+        else:
+            score+=1
+
+def train(timer):
+    game_state = game.GameState()
+    flap = 0
+    state, reward, terminal = game_state.frame_step(flap)
+    endTime = datetime.datetime.now().time() + datetime.timedelta(minutes=timer)
+    while (datetime.datetime.now().time() < endTime):
+        flap = STRATEGY.getAction(state)
+        state, newReward, terminal = game_state.frame_step(flap)
+        STRATEGY.train(state, newReward, terminal)
+    pickle.dump(QMATRIX, open("save.p", "wb" ) )
     
-    if(passedPipe(distFromPipeEdge, pipeVelX)):
-        nextPipeIndex = 1
-        global FIRST_JUMP
-        FIRST_JUMP = True
-        
-    nextLowerPipe = state['lPipeRects'][nextPipeIndex]
-    nextNextLowerPipe = state['lPipeRects'][nextPipeIndex+1]
-    nextUpperPipe = state['uPipeRects'][nextPipeIndex]
-    
-    if(playerBelowNextPipe(player,playerVelY,nextLowerPipe)):
-        return 1
-    elif(pipeDecrease(nextLowerPipe,nextNextLowerPipe) and earliestExitPoint(player,nextLowerPipe, pipeVelX, nextUpperPipe)):
-        return 1
-    else:
-        return 0
-
-def passedPipe(distFromPipeEdge, pipeVelX):
-    return distFromPipeEdge<pipeVelX-1 #checking if the bird would have passed the pipe 
-#in the next frame given the pipe's static velocity of -4 -1 for buffer
-
-def playerBelowNextPipe(player,playerVelY,nextLowerPipe):
-    return player.bottom+playerVelY+1>nextLowerPipe.top #checks if player will be below the next pipe in the next frame (1 for buffer)
-
-def pipeDecrease(nextLowerPipe,nextNextLowerPipe):
-    return nextLowerPipe.top<nextNextLowerPipe.top
-
-def earliestExitPoint(player,nextLowerPipe, pipeVelX, nextUpperPipe):
-    global FIRST_JUMP
-    if(safeExitJump(player,nextLowerPipe,pipeVelX,nextUpperPipe) and FIRST_JUMP):
-        FIRST_JUMP = False
-        return True
-    return False
-
-def safeExitJump(player,nextLowerPipe,pipeVelX,nextUpperPipe):
-    distFromPipeEdge = nextLowerPipe.right-player.left 
-    framesFromPipeEdge = abs(distFromPipeEdge//pipeVelX)
-    finalPlayerY = player.bottom
-    playerVel = -9
-    finalPlayerY += playerVel
-    maxPlayerVel = 10
-    for x in range(0,framesFromPipeEdge):
-        if(playerVel < maxPlayerVel):
-            playerVel+=1
-        finalPlayerY+=playerVel
-        if(playerHitsTopPipe(finalPlayerY,player,nextUpperPipe)):
-            return False
-    return finalPlayerY<nextLowerPipe.top
-
-def playerHitsTopPipe(playery,player,nextUpperPipe):
-    return playery-player.height<nextUpperPipe.bottom
-
 def main():
-    getcontext().prec = 6
-    run()
+    global STRATEGY
+    print("Q or H?")
+    uInput = input()
+    if(uInput == "H"):
+        STRATEGY = heuristicStrategy()
+        uInput = getTime()
+        test(uInput)
+    elif(uInput == "Q")
+        STRATEGY = QLearning()
+        print("test or train?")
+        if(uInput == "test"):
+            QLearning.setEP(0)
+            timer = getTime()
+            test(timer)
+        elif(uInput == "train"):
+            timer = getTime()
+            train(timer)
+
+def getTime():
+    print("how long (minutes)?")
+    return input() 
 
 if __name__ == "__main__":
     main()
