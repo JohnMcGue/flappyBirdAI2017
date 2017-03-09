@@ -1,8 +1,8 @@
 import pickle
 import random
 
-LEARNING_RATE = .8#.8
-DISCOUNT_FACTOR = .9#1
+LEARNING_RATE = .01#.8
+DISCOUNT_FACTOR = .99#1
 DEFAULT_REWARD = 0
 EP = .01
 FLOOREP = .01
@@ -53,23 +53,16 @@ class qLearningStrategy:
         actionReward = QMATRIX[state]
         notFlap = actionReward[0]
         flap = actionReward[1]
-        defaultReturn = 0
+        randomNumber = random.randrange(0,100)/100
+        if(EP > randomNumber):
+            return randomStrategy()
         if(flap>notFlap):
-            defaultReturn = 1
+            return 1
         elif(notFlap>flap):
-            defaultReturn = 0
+            return 0
         else:
             #print("equal")
             return randomStrategy()
-        randomNumber = random.randrange(0,100)/100
-        if(EP > randomNumber):
-            if(defaultReturn == 1):
-                return 0
-            else:
-                return 1
-        else:
-            return defaultReturn
-            #return randomStrategy()
     
     def setEP(self,value):
         global EP
@@ -132,6 +125,7 @@ def discretizeState(state):
             pipeMid = (upperPipeList[x].right,(upperPipeList[x].bottom+lowerPipeList[x].top)/2)
             if(x!=len(upperPipeList)-1):
                 discState.append(lowerPipeList[x].top-player.bottom)
+                #discState.append(lowerPipeList[x].right-player.left)
                 #discState.append((pipeMid[0]-birdMid[0])/4)
                 #discState.append((pipeMid[1]-birdMid[1]))
                 #discState.append(distanceBirdToPipeMiddle(birdMid,pipeMid))
