@@ -25,12 +25,22 @@ PIPE_HEIGHT = IMAGES['pipe'][0].get_height()
 BACKGROUND_WIDTH = IMAGES['background'].get_width()
 
 PLAYER_INDEX_GEN = cycle([0, 1, 2, 1])
-
+LIVE_REWARD = 1
+PIPE_REWARD = 10
+DEATH_REWARD = -100
 
 class GameState:
     def setFPS(self,newFPS):
         global FPS
         FPS = newFPS
+        
+    def setRewards(self,live,pipe,death):
+        global LIVE_REWARD
+        global PIPE_REWARD
+        global DEATH_REWARD
+        LIVE_REWARD = live
+        PIPE_REWARD = pipe
+        DEATH_REWARD = death
     
     def __init__(self):
         self.score = self.playerIndex = self.loopIter = 0
@@ -59,9 +69,12 @@ class GameState:
         self.playerFlapped = False # True when player flaps
 
     def frame_step(self, flap):
+        global LIVE_REWARD
+        global PIPE_REWARD
+        global DEATH_REWARD
         pygame.event.pump()
 
-        reward = 0
+        reward = LIVE_REWARD
         terminal = False
 
         if flap == 1:
@@ -76,6 +89,7 @@ class GameState:
             pipeMidPos = pipe['x'] + PIPE_WIDTH / 2
             if pipeMidPos <= playerMidPos < pipeMidPos + 4:
                 self.score += 1
+                reward = PIPE_REWARD
                 #SOUNDS['point'].play()
 
         # playerIndex basex change
@@ -118,7 +132,7 @@ class GameState:
             #SOUNDS['die'].play()
             terminal = True
             self.__init__()
-            reward = -10000
+            reward = DEATH_REWARD
 
         # draw sprites
         SCREEN.blit(IMAGES['background'], (0,0))
@@ -153,7 +167,7 @@ def getRandomPipe():
     # y of gap between upper and lower pipe
     gapYs = [20, 30, 40, 50, 60, 70, 80, 90]
     index = random.randint(0, len(gapYs)-1)
-    gapY = gapYs[index]
+    gapY = gapYs[3]
 
     gapY += int(BASEY * 0.2)
     pipeX = SCREENWIDTH + 10
