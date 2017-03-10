@@ -6,3 +6,5 @@ python 3.6: https://www.python.org/
 pygame: http://www.lfd.uci.edu/~gohlke/pythonlibs/#pygame , the cp36-32 version
 
 The controller class contains the main method. It recieves input from the console. 
+
+The flappy bird clone is adapted from https://github.com/sourabhv/FlapPyBird
