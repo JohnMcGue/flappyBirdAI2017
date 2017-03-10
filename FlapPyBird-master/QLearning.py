@@ -1,8 +1,8 @@
 import pickle
 import random
 
-LEARNING_RATE = .01#.8
-DISCOUNT_FACTOR = .99#1
+LEARNING_RATE = .01
+DISCOUNT_FACTOR = .99
 DEFAULT_REWARD = 0
 EP = .01
 FLOOREP = .01
@@ -40,7 +40,6 @@ class qLearningStrategy:
             QMATRIX = pickle.load(open("save.p", "rb"))
         except (OSError, IOError, EOFError) as e:
             print("No saved matrix: ",e)
-        #print(QMATRIX)
     
     def getAction(self,state):
         global TERMINAL
@@ -61,7 +60,6 @@ class qLearningStrategy:
         elif(notFlap>flap):
             return 0
         else:
-            #print("equal")
             return randomStrategy()
     
     def setEP(self,value):
@@ -114,30 +112,15 @@ def randomStrategy():
 
 def discretizeState(state):
     player = state['playerRect']
-    #playerVelY = state['playerVelY']
-    birdMid = (player.x,player.y+(player.height/2))
-    upperPipeList = state['uPipeRects']
     lowerPipeList = state['lPipeRects']
     discState = []
-    #discState = [playerVelY]
-    for x in range(0,len(upperPipeList)):
-        if(player.left<upperPipeList[x].right):
-            pipeMid = (upperPipeList[x].right,(upperPipeList[x].bottom+lowerPipeList[x].top)/2)
-            if(x!=len(upperPipeList)-1):
+    for x in range(0,len(lowerPipeList)):
+        if(player.left<lowerPipeList[x].right):
+            if(x!=len(lowerPipeList)-1):
                 discState.append(lowerPipeList[x].top-player.bottom)
-                #discState.append(lowerPipeList[x].right-player.left)
-                #discState.append((pipeMid[0]-birdMid[0])/4)
-                #discState.append((pipeMid[1]-birdMid[1]))
-                #discState.append(distanceBirdToPipeMiddle(birdMid,pipeMid))
-            #if(x==len(upperPipeList)-1 and upperPipeList[x].right-player.left>279):
-             #   discState.append(0)
-            #else:
-             #   discState.append(angleBirdToPipeMiddle(birdMid,pipeMid))
-    #stateSet = (discState[0],discState[1])
     stateSet = (discState[0])
     initQMATRIX(stateSet)
     return stateSet
-    #return (discState[0],discState[1],discState[2],discState[3])
     
 def initQMATRIX(state):
     global QMATRIX
