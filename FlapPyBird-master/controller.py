@@ -55,7 +55,7 @@ def main():
         uInput = input()
         if(uInput == "test"):
             STRATEGY.printQMATRIX()
-            GAME_STATE.setFPS(30)
+            GAME_STATE.setFPS(3000)
             STRATEGY.setEP(0)
             timer = getTime()
             test(timer)
