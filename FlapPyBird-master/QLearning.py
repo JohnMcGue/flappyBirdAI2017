@@ -1,7 +1,7 @@
 import pickle
 import random
 
-LEARNING_RATE = .01
+LEARNING_RATE = 1
 DISCOUNT_FACTOR = .99
 DEFAULT_REWARD = 0
 EP = .01

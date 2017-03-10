@@ -167,7 +167,7 @@ def getRandomPipe():
     # y of gap between upper and lower pipe
     gapYs = [20, 30, 40, 50, 60, 70, 80, 90]
     index = random.randint(0, len(gapYs)-1)
-    gapY = gapYs[index]
+    gapY = gapYs[3]
 
     gapY += int(BASEY * 0.2)
     pipeX = SCREENWIDTH + 10
