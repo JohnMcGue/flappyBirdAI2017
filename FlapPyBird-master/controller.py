@@ -15,7 +15,7 @@ def test(timer):
     scoreList = []
     endTime = datetime.datetime.now() + datetime.timedelta(minutes=int(timer))
     while (datetime.datetime.now().time() < endTime.time()):
-        flap = STRATEGY.getAction(state)
+        flap = STRATEGY.getAction(STRATEGY.discretize(state))
         state, newReward, terminal = GAME_STATE.frame_step(flap)
         if(terminal):
             scoreList.append(score)
@@ -33,10 +33,11 @@ def train(timer):
     state, reward, terminal = GAME_STATE.frame_step(flap)
     endTime = datetime.datetime.now() + datetime.timedelta(minutes=int(timer))
     print(endTime)
+    flap = STRATEGY.getAction(STRATEGY.discretize(state))
     while (datetime.datetime.now() < endTime):
-        flap = STRATEGY.getAction(state)
         state, newReward, terminal = GAME_STATE.frame_step(flap)
-        STRATEGY.train(state, newReward, terminal, flap)
+        newFlap = STRATEGY.train(state, newReward, terminal, flap)
+        flap = newFlap
     STRATEGY.cleanUp()
     
 def main():

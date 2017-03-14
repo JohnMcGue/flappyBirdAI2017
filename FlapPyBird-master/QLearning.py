@@ -1,7 +1,7 @@
 import pickle
 import random
 
-LEARNING_RATE = 1
+LEARNING_RATE = .01
 DISCOUNT_FACTOR = .99
 DEFAULT_REWARD = 0
 EP = .01
@@ -41,6 +41,9 @@ class qLearningStrategy:
         except (OSError, IOError, EOFError) as e:
             print("No saved matrix: ",e)
     
+    def discretize(self,state):
+        return discretizeState(state)
+    
     def getAction(self,state):
         global TERMINAL
         global EP
@@ -48,7 +51,6 @@ class qLearningStrategy:
         if(TERMINAL):
             TERMINAL = False
             return 0
-        state = discretizeState(state)
         actionReward = QMATRIX[state]
         notFlap = actionReward[0]
         flap = actionReward[1]
@@ -82,9 +84,11 @@ class qLearningStrategy:
             DEATHCOUNT += 1
             if DEATHCOUNT % DEATHS_EP_REDUCTION == 0 and EP>FLOOREP:
                EP = EP*.999
+            return 0
         else:
-            QMATRIX[CSTATE][flap] = updateReward(flap, state, newReward)
+            QMATRIX[CSTATE][flap],newFlap = updateReward(flap, state, newReward, self)
             CSTATE = state
+            return newFlap
             
     def cleanUp(self):
         global QMATRIX
@@ -93,18 +97,12 @@ class qLearningStrategy:
     def deleteSave(self):
         pickle.dump({}, open("save.p", "wb" ) )
             
-def updateReward(flap, newState, newReward):
+def updateReward(flap, newState, newReward, qLearning):
     global QMATRIX
     global CSTATE
     oldReward = QMATRIX[CSTATE][flap]
-    return oldReward + LEARNING_RATE*(newReward+DISCOUNT_FACTOR*getMax(newState)-oldReward)
-
-def getMax(newState):
-    global QMATRIX
-    newActionReward = QMATRIX[newState]
-    if(newActionReward[1]>newActionReward[0]):
-        return newActionReward[1]
-    return newActionReward[0]
+    newAction = qLearning.getAction(newState)
+    return oldReward + LEARNING_RATE*(newReward+DISCOUNT_FACTOR*QMATRIX[newState][newAction]-oldReward), newAction
 
 def randomStrategy():
     global ACTIONS
