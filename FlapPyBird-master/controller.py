@@ -48,7 +48,7 @@ def main():
     if(uInput == "H"):
         STRATEGY = heuristicStrategy()
         GAME_STATE.setFPS(30)
-        uInput = getTime()
+        uInput = getTimeFromUser()
         test(uInput)
     elif(uInput == "Q"):
         STRATEGY = qLearningStrategy()
@@ -58,16 +58,28 @@ def main():
             STRATEGY.printQMATRIX()
             GAME_STATE.setFPS(30)
             STRATEGY.setEP(0)
-            timer = getTime()
+            timer = getTimeFromUser()
             test(timer)
         elif(uInput == "train"):
-            timer = getTime()
+            timer = getTimeFromUser()
             train(timer)
     elif(uInput == "D"):
         STRATEGY = qLearningStrategy()
         STRATEGY.deleteSave()
+        print('learning rate?')
+        uInput = input()
+        learningRate = uInput
+        print('discount factor?')
+        uInput = input()
+        discountFactor = uInput
+        runExperiment(learningRate, discountFactor)
 
-def getTime():
+def runExperiment(learningRate, discountFactor):
+    STRATEGY.setLearningRate(learningRate)
+    STRATEGY.setDiscount(discountFactor)
+    
+
+def getTimeFromUser():
     print("how long (minutes)?")
     return input() 
 
