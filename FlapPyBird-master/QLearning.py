@@ -17,14 +17,26 @@ class qLearningStrategy:
     def setFloorEP(self,value):
         global FLOOREP
         FLOOREP = value
+        
+    def getEP(self):
+        global EP
+        return EP
     
     def setLearningRate(self,value):
         global LEARNING_RATE
         LEARNING_RATE = value
-        
+       
+    def getLearningRate(self):
+        global LEARNING_RATE
+        return LEARNING_RATE  
+     
     def setDiscount(self,value):
         global DISCOUNT_FACTOR
         DISCOUNT_FACTOR = value
+     
+    def getDiscount(self):
+       global DISCOUNT_FACTOR
+       return DISCOUNT_FACTOR  
         
     def setDefaultReward(self,value):
         global DEFAULT_REWARD

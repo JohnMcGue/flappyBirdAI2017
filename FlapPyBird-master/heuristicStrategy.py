@@ -1,4 +1,6 @@
 class heuristicStrategy:
+    FIRST_JUMP = True
+    
     def getAction(self,state):
         nextPipeIndex = 0
         firstLowerPipe = state['lPipeRects'][0]
