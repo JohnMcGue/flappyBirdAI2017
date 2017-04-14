@@ -25,10 +25,26 @@ class qLearningStrategy:
     def setDiscount(self,value):
         global DISCOUNT_FACTOR
         DISCOUNT_FACTOR = value
+    
+    def getLearningRate(self):
+        global LEARNING_RATE
+        return(LEARNING_RATE)
         
+    def getDiscount(self):
+        global DISCOUNT_FACTOR
+        return(DISCOUNT_FACTOR)
+    
     def setDefaultReward(self,value):
         global DEFAULT_REWARD
         DEFAULT_REWARD = value
+    
+    def setEP(self,value):
+        global EP
+        EP = value
+        
+    def getEP(self):
+        global EP
+        return(EP)
     
     def printQMATRIX(self):
         global QMATRIX
@@ -63,10 +79,6 @@ class qLearningStrategy:
             return 0
         else:
             return randomStrategy()
-    
-    def setEP(self,value):
-        global EP
-        EP = value
     
     def train(self, state, newReward, terminal, flap):
         global CSTATE
