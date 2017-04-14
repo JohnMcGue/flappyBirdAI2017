@@ -26,7 +26,7 @@ BACKGROUND_WIDTH = IMAGES['background'].get_width()
 
 PLAYER_INDEX_GEN = cycle([0, 1, 2, 1])
 LIVE_REWARD = 1
-PIPE_REWARD = 10
+PIPE_REWARD = 1
 DEATH_REWARD = -100
 
 class GameState:

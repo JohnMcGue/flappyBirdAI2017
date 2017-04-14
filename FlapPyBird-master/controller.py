@@ -10,6 +10,8 @@ STRATEGY = None
 GAME_STATE = game.GameState()
 
 def test(timer):
+    global GAME_STATE
+    global STRATEGY
     STRATEGY.setEP(0)
     STRATEGY.printQMATRIX()
     flap = 0
@@ -32,6 +34,8 @@ def test(timer):
     return len(scoreList),avgScore
 
 def train(timer):
+    global GAME_STATE
+    global STRATEGY
     flap = 0
     state, reward, terminal = GAME_STATE.frame_step(flap)
     endTime = datetime.datetime.now() + datetime.timedelta(minutes=int(timer))
@@ -47,6 +51,9 @@ def train(timer):
     print(iterations)
     
 def trainIt():
+    global GAME_STATE
+    global STRATEGY
+    STRATEGY.setEP(0)
     flap = 0
     state, reward, terminal = GAME_STATE.frame_step(flap)
     counter = 0
@@ -56,13 +63,11 @@ def trainIt():
         STRATEGY.train(state, newReward, terminal, flap)
         if(terminal):
             counter = counter + 1
-    flap = STRATEGY.getAction(state)
-    state, newReward, terminal = GAME_STATE.frame_step(flap)
-    STRATEGY.train(state, newReward, terminal, flap)
     STRATEGY.cleanUp()
     
 def testIt():
     global STRATEGY
+    global GAME_STATE
     STRATEGY.setEP(0)
     flap = 0
     state, reward, terminal = GAME_STATE.frame_step(flap)
@@ -77,12 +82,11 @@ def testIt():
             score = 0
             counter = counter + 1
         else:
-            score+=1
-        print(score)
+            score = score + 1
     avgScore = 0
     if(len(scoreList)>0):
         avgScore = sum(scoreList)/len(scoreList)
-    if(score>75000):
+    if(score>=75000):
         avgScore = 0
     print(" AVG SCORE: ",avgScore)
     return avgScore
@@ -127,7 +131,19 @@ def testtest():
     high = .99
     low = .01
     middle = .5
-    for i in range(0,9):
+    STRATEGY.setDiscount(.99)
+    STRATEGY.setLearningRate(.01)
+    csvString += "LR="+str(STRATEGY.getLearningRate())+",DF="+str(STRATEGY.getDiscount())+",EP="+str(STRATEGY.getEP())+"\n"+"Iterations,Score \n 0,48.98 \n"
+    test = 1
+    iterations = 0
+    while(test>0 and iterations < 10000):
+        print(iterations)
+        iterations = iterations + 200
+        trainIt()
+        test = testIt()
+        csvString += str(iterations)+","+str(test)+"\n"
+    STRATEGY.deleteSave()
+    for i in range(2,3):
         if(i==0):
             STRATEGY.setDiscount(low)
             STRATEGY.setLearningRate(low)
@@ -149,24 +165,13 @@ def testtest():
             STRATEGY.setLearningRate(middle)
         if(i==8):
             STRATEGY.setLearningRate(high)
-        for j in range(0,2):
+        for j in range(0,1):
             if(j==0):
                 STRATEGY.setEP(.01)
                 STRATEGY.setFloorEP(.01)
             if(j==1):
                 STRATEGY.setEP(.1)
                 STRATEGY.setFloorEP(.1)
-            STRATEGY.setDiscount(.99)
-            STRATEGY.setLearningRate(.01)
-            csvString += "LR="+str(STRATEGY.getLearningRate())+",DF="+str(STRATEGY.getDiscount())+",EP="+str(STRATEGY.getEP())+"\n"+"Iterations,Score \n 0,48.98 \n"
-            test = 1
-            iterations = 0
-            while(test>0 and iterations < 15000):
-                iterations = iterations + 200
-                print(iterations)
-                trainIt()
-                test = testIt()
-                csvString += str(iterations)+","+str(test)+"\n"
         
     text_file = open("data.csv", "w")
     text_file.write(csvString)
