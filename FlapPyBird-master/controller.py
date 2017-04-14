@@ -40,6 +40,54 @@ def train(timer):
         flap = newFlap
     STRATEGY.cleanUp()
     
+
+def getTimeFromUser():
+    print("how long (minutes)?")
+    return input() 
+
+    
+def trainIt():
+    global GAME_STATE
+    global STRATEGY
+    STRATEGY.setEP(0.01)
+    flap = 0
+    state, reward, terminal = GAME_STATE.frame_step(flap)
+    flap = STRATEGY.getAction(STRATEGY.discretize(state))
+    counter = 0
+    while (counter < 200):
+        state, newReward, terminal = GAME_STATE.frame_step(flap)
+        newFlap = STRATEGY.train(state, newReward, terminal, flap)
+        flap = newFlap
+        if(terminal):
+            counter = counter + 1
+    STRATEGY.cleanUp()
+    
+def testIt():
+    global STRATEGY
+    global GAME_STATE
+    STRATEGY.setEP(0)
+    flap = 0
+    state, reward, terminal = GAME_STATE.frame_step(flap)
+    score = 0
+    scoreList = []
+    counter = 0
+    while (counter<100 and score<75000):
+        flap = STRATEGY.getAction(STRATEGY.discretize(state))
+        state, newReward, terminal = GAME_STATE.frame_step(flap)
+        if(terminal):
+            scoreList.append(score)
+            score = 0
+            counter = counter + 1
+        else:
+            score = score + 1
+    avgScore = 0
+    if(len(scoreList)>0):
+        avgScore = sum(scoreList)/len(scoreList)
+    if(score>=75000):
+        avgScore = 0
+    print(" AVG SCORE: ",avgScore)
+    return avgScore
+
 def main():
     global STRATEGY
     global GAME_STATE
@@ -48,40 +96,53 @@ def main():
     if(uInput == "H"):
         STRATEGY = heuristicStrategy()
         GAME_STATE.setFPS(30)
-        uInput = getTimeFromUser()
+        uInput = getTime()
         test(uInput)
     elif(uInput == "Q"):
         STRATEGY = qLearningStrategy()
         print("test or train?")
         uInput = input()
         if(uInput == "test"):
-            STRATEGY.printQMATRIX()
-            GAME_STATE.setFPS(30)
-            STRATEGY.setEP(0)
-            timer = getTimeFromUser()
+            GAME_STATE.setFPS(30000)
+            timer = 1
             test(timer)
         elif(uInput == "train"):
-            timer = getTimeFromUser()
+            timer = 10
             train(timer)
     elif(uInput == "D"):
         STRATEGY = qLearningStrategy()
         STRATEGY.deleteSave()
-        print('learning rate?')
-        uInput = input()
-        learningRate = uInput
-        print('discount factor?')
-        uInput = input()
-        discountFactor = uInput
-        runExperiment(learningRate, discountFactor)
+        #print("learning rate?")
+        #uInput = input()
+        #learningRate = uInput
+        #print("discount factor?")
+        #uInput = input()
+        #discountFactor = uInput
+    elif(uInput == "T"):
+        STRATEGY = qLearningStrategy()
+        testtest()
 
-def runExperiment(learningRate, discountFactor):
-    STRATEGY.setLearningRate(learningRate)
-    STRATEGY.setDiscount(discountFactor)
-    
-
-def getTimeFromUser():
-    print("how long (minutes)?")
-    return input() 
+def testtest():
+    global STRATEGY
+    csvString = ""
+    high = .99
+    low = .01
+    middle = .5
+    STRATEGY.setDiscount(.99)
+    STRATEGY.setLearningRate(.01)
+    csvString += "LR="+str(STRATEGY.getLearningRate())+",DF="+str(STRATEGY.getDiscount())+",EP="+str(STRATEGY.getEP())+"\n"+"Iterations,Score \n 0,48.98 \n"
+    test = 1
+    iterations = 0
+    while(test>0 and iterations < 10000):
+        print(iterations)
+        iterations = iterations + 200
+        trainIt()
+        test = testIt()
+        csvString += str(iterations)+","+str(test)+"\n"
+    #STRATEGY.deleteSave()
+    text_file = open("data.csv", "w")
+    text_file.write(csvString)
+    text_file.close()
 
 if __name__ == "__main__":
     main()
